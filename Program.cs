@@ -39,6 +39,19 @@ class Program
         {
             try
             {
+                var chatMember = await botClient.GetChatMember(
+                    chatId: message.Chat.Id,
+                    userId: message.From.Id,
+                    cancellationToken: cancellationToken
+                );
+
+                // Check if the user is an administrator or the chat owner
+                if (chatMember.Status == ChatMemberStatus.Administrator || chatMember.Status == ChatMemberStatus.Creator)
+                {
+                    Console.WriteLine($"Skipped banning admin/owner: {message.From.Username ?? message.From.FirstName}");
+                    return;
+                }
+
                 // Ban the user
                 await botClient.BanChatMember(
                     chatId: message.Chat.Id,
