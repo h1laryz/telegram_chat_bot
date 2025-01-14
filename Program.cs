@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 using var cts = new CancellationTokenSource();
 
-var token = "7765829125:AAFJaXu7okkG2GdQWsKSL7r5uzBr_oRlW-0";
+var token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN");
 if (token == null)
 {
     Console.WriteLine("No token.");
