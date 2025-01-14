@@ -48,7 +48,6 @@ string CleanText(string text)
     return text;
 }
 
-
 // Проверка текста
 bool ShouldBan(string text)
 {
@@ -61,8 +60,8 @@ bool ShouldBan(string text)
     // Регулярное выражение для русского слова
     var russianWordPattern = new Regex(@"[а-яА-ЯёЁ]+");
 
-    // Регулярное выражение для подозрительных символов
-    var suspiciousPattern = new Regex(@"[^а-яА-ЯёЁ0-9\s.,!?\""\-()]");
+    // Регулярное выражение для подозрительных символов (с учётом + как разрешённого символа)
+    var suspiciousPattern = new Regex(@"[^а-яА-ЯёЁ0-9\s.,!?\""\-()&+]+");
 
     // Разбиваем текст на слова
     var words = text.Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
@@ -88,8 +87,10 @@ bool ShouldBan(string text)
         }
     }
 
-    return suspiciousWordsCount >= 2;
+    return suspiciousWordsCount >= 3;
 }
+
+
 
 bool ShouldDeleteMessage(string text)
 {
