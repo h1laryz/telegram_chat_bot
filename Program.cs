@@ -23,12 +23,19 @@ class Program
     static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         if (update.Type != UpdateType.Message || update.Message == null)
+        {
+            Console.WriteLine("update.Type != UpdateType.Message || update.Message == null");
             return;
-
+        }
+            
         var message = update.Message;
 
         if (message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup)
+        {
+            Console.WriteLine("message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup");
             return;
+        }
+            
 
         if (message.Text != null 
             && (message.Text.Contains("κᴀппеp") 
