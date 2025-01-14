@@ -135,7 +135,6 @@ async Task OnMessage(Message message, UpdateType type)
     }
 
     // Check if the message has text
-    Console.WriteLine(message.Caption);
     if ((message.Text != null && ShouldBan(message.Text)) || (message.Caption != null && ShouldBan(message.Caption)))
     {
         try
