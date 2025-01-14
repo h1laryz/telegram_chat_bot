@@ -167,11 +167,11 @@ async Task OnMessage(Message message, UpdateType type)
             );
 
             // Сообщение в группу
-            await bot.SendMessage(
-                chatId: message.Chat.Id,
-                text: $"Пользователь @{message.From.Username ?? Convert.ToString(message.From.Id)} был забанен за подозрительное сообщение.\nЕсли это ошибка, пиши сюда -> @h1lary",
-                cancellationToken: cts.Token
-            );
+            // await bot.SendMessage(
+            //     chatId: message.Chat.Id,
+            //     text: $"Пользователь @{message.From.Username ?? Convert.ToString(message.From.Id)} был забанен за подозрительное сообщение.\nЕсли это ошибка, пиши сюда -> @h1lary",
+            //     cancellationToken: cts.Token
+            // );
 
             // Удаление сообщения
             await bot.DeleteMessage(
@@ -187,37 +187,37 @@ async Task OnMessage(Message message, UpdateType type)
             Log.Error(ex, "Error banning user");
         }
     }
-    else if ((message.Text != null && ShouldDeleteMessage(message.Text)) || (message.Caption != null && ShouldDeleteMessage(message.Caption)))
-    {
-        try
-        {
-            var chatMember = await bot.GetChatMember(
-                chatId: message.Chat.Id,
-                userId: message.From.Id,
-                cancellationToken: cts.Token
-            );
+    // else if ((message.Text != null && ShouldDeleteMessage(message.Text)) || (message.Caption != null && ShouldDeleteMessage(message.Caption)))
+    // {
+    //     try
+    //     {
+    //         var chatMember = await bot.GetChatMember(
+    //             chatId: message.Chat.Id,
+    //             userId: message.From.Id,
+    //             cancellationToken: cts.Token
+    //         );
 
-            // Проверка на администратора или владельца
-            if (chatMember.Status == ChatMemberStatus.Administrator || chatMember.Status == ChatMemberStatus.Creator)
-            {
-                Log.Information($"Skipped banning admin/owner: {message.From.Username ?? message.From.FirstName}");
-                return;
-            }
+    //         // Проверка на администратора или владельца
+    //         if (chatMember.Status == ChatMemberStatus.Administrator || chatMember.Status == ChatMemberStatus.Creator)
+    //         {
+    //             Log.Information($"Skipped banning admin/owner: {message.From.Username ?? message.From.FirstName}");
+    //             return;
+    //         }
 
-            // Удаление сообщения
-            await bot.DeleteMessage(
-                chatId: message.Chat.Id,
-                messageId: message.MessageId,
-                cancellationToken: cts.Token
-            );
+    //         // Удаление сообщения
+    //         await bot.DeleteMessage(
+    //             chatId: message.Chat.Id,
+    //             messageId: message.MessageId,
+    //             cancellationToken: cts.Token
+    //         );
 
-            Log.Information($"Message from {message.From.Username ?? message.From.FirstName} was deleted in chat {message.Chat.Title}.");
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Error deleting message");
-        }
-    }
+    //         Log.Information($"Message from {message.From.Username ?? message.From.FirstName} was deleted in chat {message.Chat.Title}.");
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Log.Error(ex, "Error deleting message");
+    //     }
+    // }
 }
 
 // Метод обработки других обновлений
