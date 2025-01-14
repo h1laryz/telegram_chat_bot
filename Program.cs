@@ -4,6 +4,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Serilog;
 using System.Text.RegularExpressions;
+using System.IO;
 
 using var cts = new CancellationTokenSource();
 
@@ -13,6 +14,15 @@ if (token == null)
     Console.WriteLine("No token.");
     return;
 }
+
+// Получаем текущую дату и время
+string botStartTime = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+
+// Формируем имя файла с датой и временем
+string fileName = $"{botStartTime}_telegram_bot.txt";
+
+// Записываем в файл
+File.WriteAllText(fileName, $"Bot started at: {botStartTime}\n");
 
 // Configure Serilog for logging
 Log.Logger = new LoggerConfiguration()
@@ -90,8 +100,6 @@ bool ShouldBan(string text)
     return suspiciousWordsCount >= 3;
 }
 
-
-
 bool ShouldDeleteMessage(string text)
 {
     text = CleanText(text);
@@ -111,7 +119,6 @@ async Task OnError(Exception exception, HandleErrorSource source)
     Log.Error(exception, "An error occurred while processing the update");
 }
 
-// Метод обработки сообщений
 // Метод обработки сообщений
 async Task OnMessage(Message message, UpdateType type)
 {
@@ -173,7 +180,7 @@ async Task OnMessage(Message message, UpdateType type)
                 cancellationToken: cts.Token
             );
 
-            Log.Information($"User {message.From.Username ?? message.From.FirstName} banned in {message.Chat.Title}.");
+            Log.Information($"User {message.From.Username ?? Convert.ToString(message.From.Id)} banned in {message.Chat.Title}.");
         }
         catch (Exception ex)
         {
