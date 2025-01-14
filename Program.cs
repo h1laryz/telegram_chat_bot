@@ -29,13 +29,28 @@ Log.Information($"@{me.Username} is running... Press Enter to terminate");
 Console.ReadLine();
 cts.Cancel(); // stop the bot
 
+bool IsMessageFromChannel(Message message)
+{
+    return message.From == null; // Если From == null, это канал
+}
+
+string CleanText(string text)
+{
+    // Удаление скобок ( и )
+    text = text.Replace("(", "").Replace(")", "");
+
+    // Регулярное выражение для удаления эмоджи
+    var emojiPattern = new Regex(@"[\u20A0-\u32FF\u1F000-\u1F9FF\u1F300-\u1F5FF\u1F600-\u1F64F\u1F680-\u1F6FF\u1F700-\u1F77F\u1F780-\u1F7FF\u1F800-\u1F8FF\u1F900-\u1F9FF\u1FA00-\u1FA6F\u1FA70-\u1FAFF\u2600-\u26FF\u2700-\u27BF\u2B50\u1F004-\u1F0CF\u2B06\u2194\u2B05\u2934\u2935\u2B06\u2194\u2B05\u2194\u21A9\u21AA\u23F0\u231A\u2328\u2B06]+");
+    text = emojiPattern.Replace(text, "");
+
+    return text;
+}
+
 // Проверка текста
 bool ShouldBan(string text)
 {
+    text = CleanText(text);
     Log.Information($"Проверка текста: \"{text}\"");
-
-    // Удаляем все скобки ( и )
-    text = text.Replace("(", "").Replace(")", "");
 
     if (string.IsNullOrWhiteSpace(text))
         return false;
@@ -75,7 +90,8 @@ bool ShouldBan(string text)
 
 bool ShouldDeleteMessage(string text)
 {
-// Разбиваем текст на слова
+    text = CleanText(text);
+    
     var words = text.Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
     // Слова, которые нужно проверять
@@ -104,6 +120,13 @@ async Task OnMessage(Message message, UpdateType type)
     if (message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup)
     {
         Log.Information("message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup");
+        return;
+    }
+
+    // Проверка, если сообщение отправлено каналом
+    if (IsMessageFromChannel(message))
+    {
+        Log.Information("Message is from a channel, skipping.");
         return;
     }
 
