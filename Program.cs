@@ -49,7 +49,6 @@ string CleanText(string text)
 }
 
 
-
 // Проверка текста
 bool ShouldBan(string text)
 {
