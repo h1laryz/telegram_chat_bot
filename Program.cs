@@ -2,7 +2,7 @@
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-
+using Serilog;
 using System.Text.RegularExpressions;
 
 using var cts = new CancellationTokenSource();
@@ -14,21 +14,25 @@ if (token == null)
     return;
 }
 
+// Configure Serilog for logging
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateLogger();
+
 var bot = new TelegramBotClient(token, cancellationToken: cts.Token);
 var me = await bot.GetMe();
 bot.OnError += OnError;
 bot.OnMessage += OnMessage;
 bot.OnUpdate += OnUpdate;
 
-Console.WriteLine($"@{me.Username} is running... Press Enter to terminate");
+Log.Information($"@{me.Username} is running... Press Enter to terminate");
 Console.ReadLine();
 cts.Cancel(); // stop the bot
 
 // Проверка текста
-// Проверка текста
 bool ShouldBan(string text)
 {
-    Console.WriteLine($"Проверка текста: \"{text}\"");
+    Log.Information($"Проверка текста: \"{text}\"");
 
     // Удаляем все скобки ( и )
     text = text.Replace("(", "").Replace(")", "");
@@ -62,16 +66,16 @@ bool ShouldBan(string text)
         // Проверяем, если слово целиком русское
         if (russianWordPattern.IsMatch(word))
         {
-            Console.WriteLine($"{word} is russian.");
+            Log.Information($"{word} is russian.");
             // Проверяем, есть ли подозрительные символы в русском слове
             if (suspiciousPattern.IsMatch(word))
             {
-                Console.WriteLine($"{word} is suspicious.");
+                Log.Information($"{word} is suspicious.");
                 ++suspiciousWordsCount;
             }
             else
             {
-                Console.WriteLine($"{word} is not suspicious.");
+                Log.Information($"{word} is not suspicious.");
             }
         }
     }
@@ -79,11 +83,10 @@ bool ShouldBan(string text)
     return suspiciousWordsCount >= 2;
 }
 
-
 // Метод обработки ошибок
 async Task OnError(Exception exception, HandleErrorSource source)
 {
-    Console.WriteLine(exception); // просто вывод ошибки в консоль
+    Log.Error(exception, "An error occurred while processing the update");
 }
 
 // Метод обработки сообщений
@@ -91,13 +94,13 @@ async Task OnMessage(Message message, UpdateType type)
 {
     if (type != UpdateType.Message || message == null)
     {
-        Console.WriteLine("update.Type != UpdateType.Message || update.Message == null");
+        Log.Information("update.Type != UpdateType.Message || update.Message == null");
         return;
     }
 
     if (message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup)
     {
-        Console.WriteLine("message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup");
+        Log.Information("message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup");
         return;
     }
 
@@ -114,7 +117,7 @@ async Task OnMessage(Message message, UpdateType type)
             // Проверка на администратора или владельца
             if (chatMember.Status == ChatMemberStatus.Administrator || chatMember.Status == ChatMemberStatus.Creator)
             {
-                Console.WriteLine($"Skipped banning admin/owner: {message.From.Username ?? message.From.FirstName}");
+                Log.Information($"Skipped banning admin/owner: {message.From.Username ?? message.From.FirstName}");
                 return;
             }
 
@@ -139,11 +142,11 @@ async Task OnMessage(Message message, UpdateType type)
                 cancellationToken: cts.Token
             );
 
-            Console.WriteLine($"User {message.From.Username ?? message.From.FirstName} banned in {message.Chat.Title}.");
+            Log.Information($"User {message.From.Username ?? message.From.FirstName} banned in {message.Chat.Title}.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error banning user: {ex.Message}");
+            Log.Error(ex, "Error banning user");
         }
     }
 }
