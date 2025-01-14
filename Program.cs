@@ -90,6 +90,7 @@ async Task OnError(Exception exception, HandleErrorSource source)
 }
 
 // Метод обработки сообщений
+// Метод обработки сообщений
 async Task OnMessage(Message message, UpdateType type)
 {
     if (type != UpdateType.Message || message == null)
@@ -104,7 +105,8 @@ async Task OnMessage(Message message, UpdateType type)
         return;
     }
 
-    if (message.Text != null && ShouldBan(message.Text))
+    // Check if the message has text
+    if ((message.Text != null && ShouldBan(message.Text)) || (message.ForwardDate != null && message.Caption != null && ShouldBan(message.Caption)))
     {
         try
         {
