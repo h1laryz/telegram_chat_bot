@@ -41,7 +41,7 @@ cts.Cancel(); // stop the bot
 
 bool IsMessageFromChannel(Message message)
 {
-    return message.From == null; // Если From == null, это канал
+    return message.IsAutomaticForward;
 }
 
 string CleanText(string text)
