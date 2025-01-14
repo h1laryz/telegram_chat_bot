@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 using var cts = new CancellationTokenSource();
 
-var token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN");
+var token = "7765829125:AAFJaXu7okkG2GdQWsKSL7r5uzBr_oRlW-0";
 if (token == null)
 {
     Console.WriteLine("No token.");
@@ -15,7 +15,7 @@ if (token == null)
 }
 
 var bot = new TelegramBotClient(token, cancellationToken: cts.Token);
-var me = await bot.GetMeAsync();
+var me = await bot.GetMe();
 bot.OnError += OnError;
 bot.OnMessage += OnMessage;
 bot.OnUpdate += OnUpdate;
@@ -28,6 +28,11 @@ cts.Cancel(); // stop the bot
 // Проверка текста
 bool ShouldBan(string text)
 {
+    Console.WriteLine($"Проверка текста: \"{text}\"");
+
+    // Удаляем все скобки ( и )
+    text = text.Replace("(", "").Replace(")", "");
+
     if (string.IsNullOrWhiteSpace(text))
         return false;
 
@@ -50,20 +55,28 @@ bool ShouldBan(string text)
         return true; // Сообщение подозрительное
     }
 
+    int suspiciousWordsCount = 0;
+
     foreach (var word in words)
     {
         // Проверяем, если слово целиком русское
         if (russianWordPattern.IsMatch(word))
         {
+            Console.WriteLine($"{word} is russian.");
             // Проверяем, есть ли подозрительные символы в русском слове
             if (suspiciousPattern.IsMatch(word))
             {
-                return true; // Слово подозрительное
+                Console.WriteLine($"{word} is suspicious.");
+                ++suspiciousWordsCount;
+            }
+            else
+            {
+                Console.WriteLine($"{word} is not suspicious.");
             }
         }
     }
 
-    return false; // Нет подозрительных слов
+    return suspiciousWordsCount >= 2;
 }
 
 
