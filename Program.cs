@@ -48,17 +48,7 @@ bool ShouldBan(string text)
 
     // Разбиваем текст на слова
     var words = text.Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
-    // Слова, которые нужно проверять
-    var targetWords = new[] { "сливаю", "капперов", "бесплатно" };
-    int targetWordCount = words.Count(word => targetWords.Contains(word.ToLower()));
-
-    // Проверяем, если есть хотя бы 2 из целевых слов
-    if (targetWordCount >= 2)
-    {
-        return true; // Сообщение подозрительное
-    }
-
+    
     int suspiciousWordsCount = 0;
 
     foreach (var word in words)
@@ -81,6 +71,18 @@ bool ShouldBan(string text)
     }
 
     return suspiciousWordsCount >= 2;
+}
+
+bool ShouldDeleteMessage(string text)
+{
+// Разбиваем текст на слова
+    var words = text.Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+    // Слова, которые нужно проверять
+    var targetWords = new[] { "@", "t.me/" };
+    int targetWordCount = words.Count(word => targetWords.Contains(word.ToLower()));
+
+    return targetWordCount >= 1;
 }
 
 // Метод обработки ошибок
@@ -150,6 +152,37 @@ async Task OnMessage(Message message, UpdateType type)
         catch (Exception ex)
         {
             Log.Error(ex, "Error banning user");
+        }
+    }
+    else if ((message.Text != null && ShouldDeleteMessage(message.Text)) || (message.Caption != null && ShouldDeleteMessage(message.Caption)))
+    {
+        try
+        {
+            var chatMember = await bot.GetChatMember(
+                chatId: message.Chat.Id,
+                userId: message.From.Id,
+                cancellationToken: cts.Token
+            );
+
+            // Проверка на администратора или владельца
+            if (chatMember.Status == ChatMemberStatus.Administrator || chatMember.Status == ChatMemberStatus.Creator)
+            {
+                Log.Information($"Skipped banning admin/owner: {message.From.Username ?? message.From.FirstName}");
+                return;
+            }
+
+            // Удаление сообщения
+            await bot.DeleteMessage(
+                chatId: message.Chat.Id,
+                messageId: message.MessageId,
+                cancellationToken: cts.Token
+            );
+
+            Log.Information($"Message from {message.From.Username ?? message.From.FirstName} was deleted in chat {message.Chat.Title}.");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error deleting message");
         }
     }
 }
