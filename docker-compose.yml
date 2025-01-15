@@ -42,7 +42,7 @@ services:
         working_dir: /telegram_chat_bot
         entrypoint:
           - dotnet build && dotnet run
-        depends_on:
+       # depends_on:
          # - flyway
         #  - postgres
         networks:
