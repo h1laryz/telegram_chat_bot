@@ -1,29 +1,29 @@
 services:
 
-    postgres:
-        container_name: postgres
-        image: postgres:12
-        environment:
-          - POSTGRES_DB=postgres
-          - POSTGRES_USER=postgres
-          - POSTGRES_PASSWORD=postgres
-        ports:
-          - 5432
-        volumes:
-          - ./.pgdata:/var/lib/postgresql/data
-        networks:
-          - postgres
+    # postgres:
+    #     container_name: postgres
+    #     image: postgres:12
+    #     environment:
+    #       - POSTGRES_DB=postgres
+    #       - POSTGRES_USER=postgres
+    #       - POSTGRES_PASSWORD=postgres
+    #     ports:
+    #       - 5432
+    #     volumes:
+    #       - ./.pgdata:/var/lib/postgresql/data
+    #     networks:
+    #       - postgres
 
-    flyway:
-        container_name: flyway
-        image: flyway/flyway
-        command: -url=jdbc:postgresql://remote-learning-postgres/postgres -user=postgres -password=postgres -schemas=flyway -connectRetries=60 -validateMigrationNaming=true migrate
-        volumes:
-          - ./postgresql/migrations/:/flyway/sql
-        depends_on:
-          - postgres
-        networks:
-          - postgres
+    # flyway:
+    #     container_name: flyway
+    #     image: flyway/flyway
+    #     command: -url=jdbc:postgresql://remote-learning-postgres/postgres -user=postgres -password=postgres -schemas=flyway -connectRetries=60 -validateMigrationNaming=true migrate
+    #     volumes:
+    #       - ./postgresql/migrations/:/flyway/sql
+    #     depends_on:
+    #       - postgres
+    #     networks:
+    #       - postgres
 
     bot:
         container_name: bot
@@ -34,12 +34,12 @@ services:
           - POSTGRES_DB=postgres
           - POSTGRES_USER=postgres
           - POSTGRES_PASSWORD=postgres
+          - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
         volumes:
-          - .:/bot:rw
-          - ${TC_CORES_DIR:-./.cores}:/cores:rw
+          - .:/telegram_chat_bot:rw
         ports:
           - "8080:8080"
-        working_dir: /bot
+        working_dir: /telegram_chat_bot
         entrypoint:
           - dotnet build && dotnet run
         depends_on:
