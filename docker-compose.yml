@@ -41,7 +41,10 @@ services:
           - "8080:8080"
         working_dir: /telegram_chat_bot
         entrypoint:
+          - /bin/sh
+          - -c
           - dotnet build && dotnet run
+
        # depends_on:
          # - flyway
         #  - postgres
