@@ -35,9 +35,16 @@ bot.OnError += OnError;
 bot.OnMessage += OnMessage;
 bot.OnUpdate += OnUpdate;
 
-Log.Information($"@{me.Username} is running... Press Enter to terminate");
-Console.ReadLine();
-cts.Cancel(); // stop the bot
+Log.Information($"@{me.Username} is running... Press Ctrl+C to terminate");
+
+try
+{
+    await Task.Delay(Timeout.Infinite, cts.Token);
+}
+catch (TaskCanceledException)
+{
+    Log.Information("Bot is shutting down...");
+}
 
 bool IsMessageFromChannel(Message message)
 {

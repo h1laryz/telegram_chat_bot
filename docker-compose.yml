@@ -26,29 +26,30 @@ services:
     #       - postgres
 
     bot:
-        container_name: bot
-        build:
-          dockerfile: ./Dockerfile
-        privileged: true
-        environment:
-          - POSTGRES_DB=postgres
-          - POSTGRES_USER=postgres
-          - POSTGRES_PASSWORD=postgres
-          - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-        volumes:
-          - .:/telegram_chat_bot:rw
-        ports:
-          - "8080:8080"
-        working_dir: /telegram_chat_bot
-        entrypoint:
-          - /bin/sh
-          - -c
-          - dotnet build && dotnet run
+      container_name: bot
+      restart: always
+      build:
+        dockerfile: ./Dockerfile
+      privileged: true
+      environment:
+        - POSTGRES_DB=postgres
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+        - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      volumes:
+        - .:/telegram_chat_bot:rw
+      ports:
+        - "8080:8080"
+      working_dir: /telegram_chat_bot
+      entrypoint:
+        - /bin/sh
+        - -c
+        - dotnet build && dotnet run
 
-       # depends_on:
-         # - flyway
-        #  - postgres
-        networks:
+      # depends_on:
+        # - flyway
+      #  - postgres
+      networks:
           - postgres
    
 networks:
