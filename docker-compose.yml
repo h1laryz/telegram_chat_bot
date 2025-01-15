@@ -43,8 +43,8 @@ services:
         entrypoint:
           - dotnet build && dotnet run
         depends_on:
-          - flyway
-          - postgres
+         # - flyway
+        #  - postgres
         networks:
           - postgres
    
