@@ -82,7 +82,7 @@ bool ShouldBan(string text)
     var suspiciousPattern = new Regex(@"[^а-яА-ЯёЁ0-9\s.,!?\""\-()&+]+");
 
     // Разбиваем текст на слова
-    var words = text.Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+    var words = text.Split(new[] { ' ', '\t', '\n', '\r', ',' }, StringSplitOptions.RemoveEmptyEntries);
     
     int suspiciousWordsCount = 0;
 
