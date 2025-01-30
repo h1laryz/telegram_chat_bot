@@ -35,33 +35,33 @@ namespace TelegramBot.Utils
             return suspiciousWordsCount >= 5;
         }
 
-        public static bool IsBadChannel(String telegramChannelName)
+        public static bool IsBadChannel(string telegramChannelName)
         {
             return ContainsFootball(telegramChannelName) || ContainsFootball(telegramChannelName) || ContainsBasketball(telegramChannelName)
             || ContainsVolleyball(telegramChannelName) || ContainsTenis(telegramChannelName) || ContainsBets(telegramChannelName);
         }
 
-        private static bool ContainsFootball(String telegramChannelName)
+        private static bool ContainsFootball(string telegramChannelName)
         {
             return telegramChannelName.ToLower().Contains("футбол");
         }
 
-        private static bool ContainsBasketball(String telegramChannelName)
+        private static bool ContainsBasketball(string telegramChannelName)
         {
             return telegramChannelName.ToLower().Contains("баскетбол");
         }
 
-        private static bool ContainsVolleyball(String telegramChannelName)
+        private static bool ContainsVolleyball(string telegramChannelName)
         {
             return telegramChannelName.ToLower().Contains("волейбол");
         }
 
-        private static bool ContainsTenis(String telegramChannelName)
+        private static bool ContainsTenis(string telegramChannelName)
         {
             return telegramChannelName.ToLower().Contains("тенис") || telegramChannelName.ToLower().Contains("теннис");
         }
 
-        private static bool ContainsBets(String telegramChannelName)
+        private static bool ContainsBets(string telegramChannelName)
         {
             return telegramChannelName.ToLower().Contains("ставки") || telegramChannelName.ToLower().Contains("прогнозы")
             || telegramChannelName.ToLower().Contains("322");
