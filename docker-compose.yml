@@ -44,7 +44,7 @@ services:
       entrypoint:
         - /bin/sh
         - -c
-        - dotnet build && dotnet run
+        - dotnet build src && dotnet run --project src
 
       # depends_on:
         # - flyway
