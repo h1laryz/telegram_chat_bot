@@ -38,8 +38,6 @@ services:
         - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       volumes:
         - .:/telegram_chat_bot:rw
-      ports:
-        - "8080:8080"
       working_dir: /telegram_chat_bot
       entrypoint:
         - /bin/sh
