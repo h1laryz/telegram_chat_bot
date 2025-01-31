@@ -46,7 +46,7 @@ namespace TelegramBot.Utils
 
             foreach (var word in words)
             {
-                if (IsWordCyryllic(word) && IsWordSuspicious(word))
+                if (IsWordSuspicious(word))
                 {
                     ++suspiciousWordsCount;
                 }
