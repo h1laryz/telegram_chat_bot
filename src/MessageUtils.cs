@@ -1,38 +1,60 @@
 using System;
 using System.Text.RegularExpressions;
+using Microsoft.VisualBasic;
 using Telegram.Bot.Types;
 
 namespace TelegramBot.Utils
 {
     public static class MessageUtils
     {
+        private readonly static Regex _suspiciousRegex = new Regex(@"[^а-яА-ЯёЁ0-9\s.,!?\""\-()&+]+");
+        private readonly static Regex _cyrillicRegex = new Regex(@"\p{IsCyrillic}+");
+        private readonly static Regex _emojiPattern = new Regex(@"\p{So}|\p{Cs}\p{Cs}(\p{Cf}\p{Cs}\p{Cs})*");
+        private readonly static Regex _punctuationPattern = new Regex(@"[^\w\s]");
+        private readonly static Regex _latinPattern = new Regex("^[\u0000-\u007F]+$");
+
         public static bool IsMessageFromThisChannel(Message message) => message.IsAutomaticForward;
 
         public static bool IsMessageFromChannel(Message message) => Convert.ToString(message.ForwardOrigin?.GetType()) == "Telegram.Bot.Types.MessageOriginChannel";
 
         public static string CleanText(string text)
         {
-            text = text.Replace("(", "").Replace(")", "");
-            var emojiPattern = new Regex(@"\p{So}|\p{Cs}\p{Cs}(\p{Cf}\p{Cs}\p{Cs})*");
-            return emojiPattern.Replace(text, "");
+            text = _emojiPattern.Replace(text, "");
+            text = _punctuationPattern.Replace(text, " ");
+
+            return text.Trim();
         }
 
         public static bool ShouldBan(string text)
         {
             text = CleanText(text);
-            var russianWordPattern = new Regex(@"[а-яА-ЯёЁ]+");
-            var suspiciousPattern = new Regex(@"[^а-яА-ЯёЁ0-9\s.,!?\""\-()&+]+");
+            
             var words = text.Split(new[] { ' ', '\t', '\n', '\r', ',' }, StringSplitOptions.RemoveEmptyEntries);
             int suspiciousWordsCount = 0;
 
             foreach (var word in words)
             {
-                if (russianWordPattern.IsMatch(word) && suspiciousPattern.IsMatch(word))
+                if (IsWordCyryllic(word) && IsWordSuspicious(word))
                 {
-                    suspiciousWordsCount++;
+                    ++suspiciousWordsCount;
                 }
             }
             return suspiciousWordsCount >= 5;
+        }
+
+        public static bool IsWordCyryllic(string word)
+        {
+            return _cyrillicRegex.IsMatch(CleanText(word));
+        }
+
+        public static bool IsWordLatin(string word)
+        {
+            return _latinPattern.IsMatch(CleanText(word));
+        }
+
+        public static bool IsWordSuspicious(string word)
+        {
+            return _suspiciousRegex.IsMatch(CleanText(word));
         }
 
         public static bool IsBadChannel(string telegramChannelName)

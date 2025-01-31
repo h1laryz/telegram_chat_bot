@@ -38,6 +38,12 @@ namespace TelegramBot.Services
                     await HandleCommandsAsync(message);
                     return;
                 }
+
+                if (message.Text.Contains("tiktok.com"))
+                {
+                    await VideoSaver.SaveFromTiktokAsync(_bot, message);
+                    return;
+                }
             }
             else if (!string.IsNullOrEmpty(message.Caption))
             {
@@ -108,14 +114,9 @@ namespace TelegramBot.Services
                     return;
                 }
 
-                if (!Regex.IsMatch(roleName, @"\p{IsCyrillic}+") && !Regex.IsMatch(roleName, "^[\u0000-\u007F]+$"))
+                if (MessageUtils.IsWordCyryllic(roleName) && MessageUtils.IsWordSuspicious(roleName))
                 {
-                    await _bot.SendMessage(chatId, $"Можно использовать только киррилицу/латиницу!", replyParameters: message);
-                    return;
-                }
-                if (roleName.Contains("admin", StringComparison.OrdinalIgnoreCase) || roleName.Contains("админ", StringComparison.OrdinalIgnoreCase) || roleName.Contains("адмін", StringComparison.OrdinalIgnoreCase))
-                {
-                    await _bot.SendMessage(chatId, $"Ты кого наебать пытаешься, хуесос?", replyParameters: message);
+                    await _bot.SendMessage(chatId, $"Чет мутная роль, давай другую", replyParameters: message);
                     return;
                 }
 
