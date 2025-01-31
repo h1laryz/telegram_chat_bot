@@ -81,15 +81,15 @@ namespace TelegramBot.Services
             if (message.Text.Contains("/help"))
             {
                 string commandList = "Список доступных команд:\n\n" +
-                             "/role [название] - назначить себе роль\n"; 
+                             "/role <название> - назначить себе роль\n"; 
                              //+ "/old - узнать время, проведенное в чате"; // Добавьте другие команды по необходимости
 
-                await _bot.SendMessage(chatId, commandList);
+                await _bot.SendMessage(chatId, commandList, replyParameters: message);
             }
 
             if (message.Text.Contains("/old"))
             {
-                await _bot.SendMessage(chatId, $"скоро...", ParseMode.None, message);
+                await _bot.SendMessage(chatId, $"скоро...", replyParameters: message);
             }
 
             if (message.Text.Contains("/role"))
