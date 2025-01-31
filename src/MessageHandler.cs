@@ -102,7 +102,7 @@ namespace TelegramBot.Services
             {
                 if (!message.Text.Contains(' '))
                 {
-                    await _bot.SendMessage(chatId, "пример: /role dolbaeb", replyParameters: message);
+                    await _bot.SendMessage(chatId, "Пример: `/role dolbaeb`", replyParameters: message);
                     return;
                 }
 
@@ -110,7 +110,7 @@ namespace TelegramBot.Services
 
                 if (string.IsNullOrEmpty(roleName))
                 {
-                    await _bot.SendMessage(chatId, "Укажите название роли после команды. Пример: /role lox", replyParameters: message);
+                    await _bot.SendMessage(chatId, "Укажите название роли после команды. Пример: `/role lox`", replyParameters: message);
                     return;
                 }
 
@@ -137,8 +137,7 @@ namespace TelegramBot.Services
                 }
 
                 await _bot.SetChatAdministratorCustomTitle(chatId, userId, roleName, _cancellationToken);
-
-                await _bot.SendMessage(chatId, $"Теперь ваша роль - {roleName}!", ParseMode.None, message);
+                await _bot.SendMessage(chatId, $"Теперь ваша роль — {roleName}!", replyParameters: message);
             }
         }
 
