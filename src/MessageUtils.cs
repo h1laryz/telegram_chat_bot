@@ -7,8 +7,9 @@ namespace TelegramBot.Utils
 {
     public static class MessageUtils
     {
-        private readonly static Regex _suspiciousRegex = new Regex(@"[^а-яА-ЯёЁ0-9\s.,!?\""\-()&+]+");
         private readonly static Regex _cyrillicRegex = new Regex(@"\p{IsCyrillic}+");
+        private readonly static Regex _nonCyrillicRegex = new Regex(@"[^\p{IsCyrillic}]+");
+
         private readonly static Regex _emojiPattern = new Regex(@"\p{So}|\p{Cs}\p{Cs}(\p{Cf}\p{Cs}\p{Cs})*");
         private readonly static Regex _punctuationPattern = new Regex(@"[^\w\s]");
         private readonly static Regex _latinPattern = new Regex("^[\u0000-\u007F]+$");
@@ -32,7 +33,8 @@ namespace TelegramBot.Utils
                 || text.Contains("адмін", StringComparison.OrdinalIgnoreCase)
                 || text.Contains("owner", StringComparison.OrdinalIgnoreCase)
                 || text.Contains("власник", StringComparison.OrdinalIgnoreCase)
-                || text.Contains("создатель", StringComparison.OrdinalIgnoreCase);
+                || text.Contains("создатель", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("владелец", StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool ShouldBan(string text)
@@ -57,6 +59,22 @@ namespace TelegramBot.Utils
             return _cyrillicRegex.IsMatch(CleanText(word));
         }
 
+        public static bool WordContainsCyryllic(string word)
+        {
+            word = CleanText(word);
+
+            foreach (var c in word)
+            {
+                if (_cyrillicRegex.IsMatch(c.ToString()))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
         public static bool IsWordLatin(string word)
         {
             return _latinPattern.IsMatch(CleanText(word));
@@ -64,7 +82,7 @@ namespace TelegramBot.Utils
 
         public static bool IsWordSuspicious(string word)
         {
-            return _suspiciousRegex.IsMatch(CleanText(word));
+            return WordContainsCyryllic(word) && !WordContainsCyryllic(word);
         }
 
         public static bool IsBadChannel(string telegramChannelName)
