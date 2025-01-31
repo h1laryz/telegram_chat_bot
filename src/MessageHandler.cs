@@ -6,6 +6,8 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Serilog;
 using TelegramBot.Utils;
+using System.Text.RegularExpressions;
+using System.Reflection.Metadata;
 
 namespace TelegramBot.Services
 {
@@ -26,13 +28,24 @@ namespace TelegramBot.Services
                 return;
 
             var message = update.Message;
-            if (message.Text != null)
+
+            if (!string.IsNullOrEmpty(message.Text))
             {
                 Log.Information($"Received message: {message.Text} ");
+
+                if (message.Text[0] == '/')
+                {
+                    await HandleCommandsAsync(message);
+                    return;
+                }
             }
-            if (message.Caption != null)
+            else if (!string.IsNullOrEmpty(message.Caption))
             {
                 Log.Information($"Received message: {message.Caption} ");
+            }
+            else
+            {
+                return;
             }
                 
             if (message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup)
@@ -55,10 +68,88 @@ namespace TelegramBot.Services
             }
         }
 
+        private async Task HandleCommandsAsync(Message message)
+        {
+            if (message.Text == null || message.From == null || message.Chat == null)
+            {
+                return;
+            }
+
+            var chatId = message.Chat.Id;
+            var userId = message.From.Id;
+
+            if (message.Text.Contains("/help"))
+            {
+                string commandList = "Список доступных команд:\n\n" +
+                             "/role [название] - назначить себе роль\n"; 
+                             //+ "/old - узнать время, проведенное в чате"; // Добавьте другие команды по необходимости
+
+                await _bot.SendMessage(chatId, commandList);
+            }
+
+            if (message.Text.Contains("/old"))
+            {
+                await _bot.SendMessage(chatId, $"скоро...", ParseMode.None, message);
+            }
+
+            if (message.Text.Contains("/role"))
+            {
+                if (!message.Text.Contains(' '))
+                {
+                    await _bot.SendMessage(chatId, "пример: /role dolbaeb", replyParameters: message);
+                    return;
+                }
+
+                string roleName = message.Text.Substring(message.Text.IndexOf(' ') + 1).Trim();
+
+                if (string.IsNullOrEmpty(roleName))
+                {
+                    await _bot.SendMessage(chatId, "Укажите название роли после команды. Пример: /role lox", replyParameters: message);
+                    return;
+                }
+
+                if (!Regex.IsMatch(roleName, @"\p{IsCyrillic}+") && !Regex.IsMatch(roleName, "^[\u0000-\u007F]+$"))
+                {
+                    await _bot.SendMessage(chatId, $"Можно использовать только киррилицу/латиницу!", replyParameters: message);
+                    return;
+                }
+                if (roleName.Contains("admin", StringComparison.OrdinalIgnoreCase) || roleName.Contains("админ", StringComparison.OrdinalIgnoreCase) || roleName.Contains("адмін", StringComparison.OrdinalIgnoreCase))
+                {
+                    await _bot.SendMessage(chatId, $"Ты кого наебать пытаешься, хуесос?", replyParameters: message);
+                    return;
+                }
+
+                try
+                {
+                    await _bot.PromoteChatMember(chatId, userId, 
+                    canChangeInfo: false, // Разрешение на изменение информации о чате
+                    canPostMessages: false, // Разрешение на отправку сообщений
+                    canEditMessages: false, // Разрешение на редактирование сообщений
+                    canDeleteMessages: false, // Разрешение на удаление сообщений
+                    canInviteUsers: true, // Разрешение на приглашение пользователей
+                    canPinMessages: false, // Разрешение на закрепление сообщений
+                    canPromoteMembers: false); // Разрешение на назначение других администраторов
+                }
+                catch (Exception exception)
+                {
+                    Log.Error($"Promotion error: ${exception.ToString()}");
+                }
+
+                await _bot.SetChatAdministratorCustomTitle(chatId, userId, roleName, _cancellationToken);
+
+                await _bot.SendMessage(chatId, $"Теперь ваша роль - {roleName}!", ParseMode.None, message);
+            }
+        }
+
         private async Task DeleteMessageAsync(Message message)
         {
             try
             {
+                if (message.From == null)
+                {
+                    return;
+                }
+
                 var chatMember = await _bot.GetChatMember(message.Chat.Id, message.From.Id, _cancellationToken);
                 if (chatMember.Status == ChatMemberStatus.Administrator || chatMember.Status == ChatMemberStatus.Creator)
                 {
@@ -79,6 +170,11 @@ namespace TelegramBot.Services
         {
             try
             {
+                if (message.From == null)
+                {
+                    return;
+                }
+
                 var chatMember = await _bot.GetChatMember(message.Chat.Id, message.From.Id, _cancellationToken);
                 if (chatMember.Status == ChatMemberStatus.Administrator || chatMember.Status == ChatMemberStatus.Creator)
                 {

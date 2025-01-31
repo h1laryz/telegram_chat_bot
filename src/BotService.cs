@@ -13,6 +13,7 @@ namespace TelegramBot.Services
         private readonly TelegramBotClient _bot;
         private readonly CancellationTokenSource _cts;
         private readonly MessageHandler _messageHandler;
+        static public string Username {get; private set;} = ""; 
 
         public BotService(string token)
         {
@@ -25,6 +26,7 @@ namespace TelegramBot.Services
         {
             Log.Information("Starting bot...");
             var me = await _bot.GetMe();
+            Username = me.Username;
             Log.Information($"Bot @{me.Username} started.");
 
             _bot.StartReceiving(
