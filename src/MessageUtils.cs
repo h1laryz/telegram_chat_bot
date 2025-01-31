@@ -1,6 +1,7 @@
 using System;
 using System.Text.RegularExpressions;
 using Microsoft.VisualBasic;
+using Serilog;
 using Telegram.Bot.Types;
 
 namespace TelegramBot.Utils
@@ -97,7 +98,7 @@ namespace TelegramBot.Utils
 
         public static bool IsWordSuspicious(string word)
         {
-            return WordContainsCyryllic(word) && !WordContainsCyryllic(word);
+            return WordContainsCyryllic(word) && WordContainsNonCyryllic(word);
         }
 
         public static bool IsBadChannel(string telegramChannelName)
