@@ -25,6 +25,16 @@ namespace TelegramBot.Utils
             return text.Trim();
         }
 
+        public static bool ContainsAdmin(string text)
+        {
+            return text.Contains("админ", StringComparison.OrdinalIgnoreCase) 
+                || text.Contains("admin", StringComparison.OrdinalIgnoreCase) 
+                || text.Contains("адмін", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("owner", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("власник", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("создатель", StringComparison.OrdinalIgnoreCase);
+        }
+
         public static bool ShouldBan(string text)
         {
             text = CleanText(text);

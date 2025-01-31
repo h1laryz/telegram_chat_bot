@@ -114,9 +114,9 @@ namespace TelegramBot.Services
                     return;
                 }
 
-                if (MessageUtils.IsWordCyryllic(roleName) && MessageUtils.IsWordSuspicious(roleName))
+                if ((MessageUtils.IsWordCyryllic(roleName) && MessageUtils.IsWordSuspicious(roleName)) || MessageUtils.ContainsAdmin(roleName))
                 {
-                    await _bot.SendMessage(chatId, $"Чет мутная роль, давай другую", replyParameters: message);
+                    await _bot.SendMessage(chatId, $"Чет мутная роль, давай другую.", replyParameters: message);
                     return;
                 }
 
