@@ -74,6 +74,21 @@ namespace TelegramBot.Utils
             return false;
         }
 
+        public static bool WordContainsNonCyryllic(string word)
+        {
+            word = CleanText(word);
+
+            foreach (var c in word)
+            {
+                if (_nonCyrillicRegex.IsMatch(c.ToString()))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
 
         public static bool IsWordLatin(string word)
         {
