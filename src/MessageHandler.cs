@@ -29,6 +29,19 @@ namespace TelegramBot.Services
 
             var message = update.Message;
 
+            if (message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup)
+            {
+                return;
+            }
+
+            if (MessageUtils.IsMessageFromThisChannel(message))
+            {
+                Log.Information("Message is from a channel, skipping.");
+                return;
+            }
+
+            Log.Information("asd");
+
             if (!string.IsNullOrEmpty(message.Text))
             {
                 Log.Information($"Received message: {message.Text} ");
@@ -49,17 +62,14 @@ namespace TelegramBot.Services
             {
                 Log.Information($"Received message: {message.Caption} ");
             }
-            else
+            else if (message.ViaBot != null && message.From != null)
             {
-                return;
-            }
-                
-            if (message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup)
-                return;
+                var botMember = await _bot.GetChatMember(message.Chat.Id, message.ViaBot.Id, _cancellationToken);
+                if (botMember != null && botMember.Status != ChatMemberStatus.Administrator)
+                {
+                    await DeleteMessageAsync(message);
+                }
 
-            if (MessageUtils.IsMessageFromThisChannel(message))
-            {
-                Log.Information("Message is from a channel, skipping.");
                 return;
             }
 
