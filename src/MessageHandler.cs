@@ -25,8 +25,10 @@ namespace TelegramBot.Services
         public async Task HandleUpdateAsync(Update update)
         {
             if (update.Type != UpdateType.Message || update.Message == null)
+            {
                 return;
-
+            }
+                
             var message = update.Message;
 
             if (message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup)
@@ -40,7 +42,17 @@ namespace TelegramBot.Services
                 return;
             }
 
-            Log.Information("asd");
+            if (message.ViaBot != null && message.From != null)
+            {
+                Log.Information("ViaBot");
+                var botMember = await _bot.GetChatMember(message.Chat.Id, message.ViaBot.Id, _cancellationToken);
+                if (botMember != null && botMember.Status != ChatMemberStatus.Administrator)
+                {
+                    await DeleteMessageAsync(message);
+                }
+
+                return;
+            }
 
             if (!string.IsNullOrEmpty(message.Text))
             {
@@ -61,16 +73,6 @@ namespace TelegramBot.Services
             else if (!string.IsNullOrEmpty(message.Caption))
             {
                 Log.Information($"Received message: {message.Caption} ");
-            }
-            else if (message.ViaBot != null && message.From != null)
-            {
-                var botMember = await _bot.GetChatMember(message.Chat.Id, message.ViaBot.Id, _cancellationToken);
-                if (botMember != null && botMember.Status != ChatMemberStatus.Administrator)
-                {
-                    await DeleteMessageAsync(message);
-                }
-
-                return;
             }
 
             if ((message.Text != null && MessageUtils.ShouldBan(message.Text)) || 
